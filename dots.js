@@ -1,8 +1,8 @@
 // @format
 import React, { useState, useRef, useEffect } from 'react';
-import handleViewport from 'react-in-viewport';
 import ReactDOM from 'react-dom';
 import styles from './dots.module.css';
+import { useScrollPosition, useElementPosition } from './scroll-pos.js';
 
 const existingColors = new Set();
 function matchColor(key) {
@@ -50,20 +50,31 @@ function expand(aggregates) {
   return expanded;
 }
 
-const DotSection = handleViewport(function(props) {
-  const { height, children, forwardedRef, mode } = props;
+const DotSection = function(props) {
+  const { height, children, mode } = props;
+  const [pos, setPos] = useState(0);
+  const ref = useRef(null);
+
+  useElementPosition(
+    ({ percent }) => {
+      setPos(percent);
+    },
+    [],
+    { ref: ref }
+  );
 
   return (
     <div
-      ref={forwardedRef}
+      ref={ref}
       style={{ height: height }}
       className="scroller__section"
       data-graph-mode={mode}
     >
+      <h1>{pos}</h1>
       {children}
     </div>
   );
-});
+};
 
 function DotHistogram(props) {
   return (
