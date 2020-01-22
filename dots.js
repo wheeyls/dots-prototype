@@ -1,4 +1,5 @@
 // @format
+
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styles from './dots.module.css';
@@ -51,13 +52,16 @@ function expand(aggregates) {
 }
 
 const DotSection = function(props) {
-  const { height, children, mode } = props;
+  const { height, children, mode, onEnter } = props;
   const [pos, setPos] = useState(0);
   const ref = useRef(null);
 
   useElementPosition(
     ({ percent }) => {
-      setPos(percent);
+      if (percent > 0.5 && percent < 1.0) {
+        onEnter(mode);
+        setPos(percent);
+      }
     },
     [],
     { ref: ref }
@@ -164,7 +168,7 @@ function DotBar(props) {
 
 function ProductGraph(props) {
   const nodes = expand(props.dataBrowser.aggregates);
-  const pos = props.position();
+  const pos = props.posFn();
 
   return (
     <div>
@@ -197,10 +201,10 @@ function DotGraph(props) {
 
   const handleClick = () => nextMode(mode);
   let colorPicker;
-  let position = barGraph;
+  let posFn = barGraph;
 
-  function entered(mode) {
-    setMode(mode);
+  function entered(m) {
+    setMode(m);
   }
 
   if (mode === 'bar-segment' || mode === 'histogram-segment') {
@@ -210,12 +214,13 @@ function DotGraph(props) {
   }
 
   if (mode === 'histogram' || mode === 'histogram-segment') {
-    position = hist;
+    posFn = hist;
   } else if (mode === 'histogram-split') {
     colorPicker = item => matchColor(item.company_segment);
-    position = segmentedHist;
+    posFn = segmentedHist;
   }
 
+  console.log({ mode });
   return (
     <div className="scroller" onClick={handleClick}>
       <div className="scroller__graph">
@@ -224,7 +229,7 @@ function DotGraph(props) {
             <ProductGraph
               product={perProduct.selectedProduct}
               dataBrowser={perProduct}
-              position={position}
+              posFn={posFn}
               color={colorPicker}
             />
           ))}

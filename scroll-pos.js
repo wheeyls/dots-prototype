@@ -4,6 +4,13 @@ import { useRef, useLayoutEffect } from 'react';
 
 const isBrowser = typeof window !== `undefined`;
 
+function sortBy(list, cb) {
+  const pairs = list.map(item => [cb(item), item]);
+
+  pairs.sort((a, b) => a[0] - b[0]);
+  return pairs.map(pair => pair[1]);
+}
+
 function getScrollPosition({ element, useWindow }) {
   if (!isBrowser) return { x: 0, y: 0 };
 
@@ -48,11 +55,37 @@ export function useScrollPosition(
   }, deps);
 }
 
+const refs = new Set();
+
+function runTest({ offset, elements }) {
+  const midline = document.body.scrollTop + window.innerHeight * offset;
+  console.log(midline, document.body.scrollTop, window.innerHeight);
+
+  const sorted = sortBy(Array.from(elements), function(item) {
+    const el = item.current;
+    const top = el.offsetTop;
+    const bottom = top + el.offsetHeight;
+
+    if (top <= midline && bottom >= midline) {
+      return -1;
+    } else if (bottom < midline) {
+      return midline - bottom;
+    } else {
+      // top > midline
+      return top - midline;
+    }
+  });
+
+  return sorted[0];
+}
+
 export function useElementPosition(
   effect,
   deps,
   { element, useWindow, wait = 50, ref }
 ) {
+  refs.add(ref);
+  console.log(refs);
   useScrollPosition(
     ({ currPos, prevPos }) => {
       const threshold = window.innerHeight - currPos.y;
@@ -65,8 +98,6 @@ export function useElementPosition(
       } else if (threshold >= top) {
         pos = (threshold - top) / (bottom - top);
       }
-
-      console.log({ threshold, bottom, top, pos, currPos });
 
       effect({ percent: pos });
     },

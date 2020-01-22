@@ -32,36 +32,6 @@ function runTest({ offset, elements, current }) {
   });
 
   return sorted[0];
-
-  /*
-  const $filtered = elements.filter($el => $el.is(':visible'));
-
-  const sorted = _($filtered).sortBy(function($el) {
-    const { top } = $el.offset();
-    const bottom = top + $el.outerHeight();
-
-    if (top <= midline && bottom >= midline) {
-      return -1;
-    } else if (bottom < midline) {
-      return midline - bottom;
-    } else {
-      // top > midline
-      return top - midline;
-    }
-  });
-
-  if (current === sorted[0]) {
-    return;
-  }
-
-  if (current) {
-    current.trigger('centerpiece:exited');
-  }
-  if (sorted[0]) {
-    sorted[0].trigger('centerpiece:entered');
-  }
-  current = sorted[0];
-  */
 }
 
 function noop() {}
@@ -81,7 +51,3 @@ export function visualFocus(ref, { onEnter = noop, offset = 0.5 }) {
   callbacks.push();
   start({ offset });
 }
-
-export function VisualFocus(props) {}
-
-export function VisualFocusItem(props) {}
