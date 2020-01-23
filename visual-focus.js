@@ -1,5 +1,7 @@
 // @format
 
+import { useRef } from 'react';
+import { throttle } from 'throttle-debounce';
 let current = null;
 const elements = [];
 const callbacks = [];
@@ -17,6 +19,9 @@ function runTest({ offset, elements, current }) {
   console.log(midline, document.body.scrollTop, window.innerHeight);
 
   const sorted = sortBy(elements, function(item) {
+    if (!item.current) {
+      return;
+    }
     const el = item.current;
     const top = el.offsetTop;
     const bottom = top + el.offsetHeight;
@@ -47,7 +52,47 @@ export function visualFocus(ref, { onEnter = noop, offset = 0.5 }) {
     current = ref;
   }
 
+  watcher.add(ref);
+  const currentRef = useRef(watcher.isCurrent(ref));
+
   elements.push(ref);
   callbacks.push();
   start({ offset });
+
+  return currentRef;
+}
+
+class Watcher {
+  constructor() {
+    this.list = new Set();
+    this.callbacks = [];
+    this.currentRef = null;
+  }
+
+  add(ref, callback) {
+    if (this.list.has(ref)) {
+      return;
+    }
+
+    if (this.currentRef === null) {
+      this.currentRef = ref;
+    }
+    this.list.add(ref);
+    this.callbacks.push(currentRef => callback(currentRef === ref));
+  }
+
+  test() {
+    this.currentRef = runTest({ elements: Array.from(this.list), offset: 0.5 });
+    this.callbacks.forEach(cb => cb(this.currentRef));
+  }
+}
+
+const watcher = new Watcher();
+window.addEventListener(
+  'scroll',
+  throttle(50, () => watcher.test())
+);
+export function useVisualFocus(effect, deps, ref) {
+  watcher.add(ref, effect);
+  watcher.test();
 }

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import styles from './dots.module.css';
 import { useScrollPosition, useElementPosition } from './scroll-pos.js';
+import { useVisualFocus } from './visual-focus.js';
 
 const existingColors = new Set();
 function matchColor(key) {
@@ -53,18 +54,16 @@ function expand(aggregates) {
 
 const DotSection = function(props) {
   const { height, children, mode, onEnter } = props;
-  const [pos, setPos] = useState(0);
   const ref = useRef(null);
 
-  useElementPosition(
-    ({ percent }) => {
-      if (percent > 0.5 && percent < 1.0) {
+  useVisualFocus(
+    focused => {
+      if (focused) {
         onEnter(mode);
-        setPos(percent);
       }
     },
     [],
-    { ref: ref }
+    ref
   );
 
   return (
@@ -74,8 +73,9 @@ const DotSection = function(props) {
       className="scroller__section"
       data-graph-mode={mode}
     >
-      <h1>{pos}</h1>
-      {children}
+      <div class="scroller__section__text">
+        {children}
+      </div>
     </div>
   );
 };
@@ -223,18 +223,6 @@ function DotGraph(props) {
   console.log({ mode });
   return (
     <div className="scroller" onClick={handleClick}>
-      <div className="scroller__graph">
-        <div className="scroller__graph__inner">
-          {props.dataBrowser.perProduct().map(perProduct => (
-            <ProductGraph
-              product={perProduct.selectedProduct}
-              dataBrowser={perProduct}
-              posFn={posFn}
-              color={colorPicker}
-            />
-          ))}
-        </div>
-      </div>
       <div className="scroller__copy">
         <DotSection
           mode="bar"
@@ -293,6 +281,18 @@ function DotGraph(props) {
             at satisfying different types of customers.
           </p>
         </DotSection>
+      </div>
+      <div className="scroller__graph">
+        <div className="scroller__graph__inner">
+          {props.dataBrowser.perProduct().map(perProduct => (
+            <ProductGraph
+              product={perProduct.selectedProduct}
+              dataBrowser={perProduct}
+              posFn={posFn}
+              color={colorPicker}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,32 +1,40 @@
+body {
+  font-family: "Barlow", sans-serif;
+}
+
 .scroller {
   display: flex;
 }
 
 .scroller__graph {
-  width: 61.8%;
-  padding-right: 0.5rem;
+  width: 75%;
+  padding-left: 0.5rem;
 }
 
 .scroller__graph__inner {
   top: 0;
   bottom: 0;
+  right: 0;
   position: fixed;
-  width: 61.8%;
+  width: 75%;
   overflow: hidden;
   margin: 1rem;
 }
 
 .scroller__copy {
-  width: 38.2%;
-  padding-left: 0.5rem;
+  width: 24%;
+  padding-right: 0.5rem;
 }
 
 .scroller__section {
-  padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border: 1px solid red;
+}
+
+.scroller__section__text {
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .dotgraph {
@@ -37,8 +45,8 @@
 
 .dotgraph__dot {
   position: absolute;
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 100%;
   transition: all 0.8s ease-in-out;
 }
